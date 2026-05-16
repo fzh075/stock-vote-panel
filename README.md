@@ -7,9 +7,9 @@
 
 | 服务 | URL |
 | --- | --- |
-| 前端（Static Site） | `https://stock-vote-panel-web.onrender.com`  ← *部署后填入实际地址* |
-| 后端（Web Service） | `https://stock-vote-panel-api.onrender.com`  ← *部署后填入实际地址* |
-| 健康检查 | `/api/health` |
+| 前端（Static Site） | https://stock-vote-panel-web.onrender.com |
+| 后端（Web Service） | https://stock-vote-panel-api.onrender.com |
+| 健康检查 | https://stock-vote-panel-api.onrender.com/api/health |
 
 > ⚠️ Render 免费档冷启动约 30-60s，第一次请求请耐心等待。
 
