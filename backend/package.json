@@ -1,0 +1,24 @@
+{
+  "name": "stock-vote-panel-backend",
+  "version": "1.0.0",
+  "description": "AI 股票分析面板 - 后端 (Express + LLM + Supabase)",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "setup:supabase": "node ../scripts/setup-supabase.mjs",
+    "create:supabase": "node ../scripts/create-supabase-project.mjs",
+    "verify": "node ../scripts/verify.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "node-fetch": "^3.3.2"
+  }
+}

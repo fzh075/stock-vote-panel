@@ -1,0 +1,49 @@
+# Render 部署配置（一键导入）
+# 1) 在 GitHub 推送本仓库
+# 2) Render Dashboard → New → Blueprint → 选择仓库 → 自动识别本文件
+# 3) 在两个 Service 的 Environment 里填入下方 sync:false 的密钥
+
+services:
+  # ---------- 后端 ----------
+  - type: web
+    name: stock-vote-panel-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: PORT
+        value: 8080
+      - key: FINNHUB_API_KEY
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_BASE_URL
+        value: https://api.openai.com/v1
+      - key: LLM_MODEL
+        value: gpt-4o-mini
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: FRONTEND_ORIGIN
+        sync: false   # 上线后填前端 URL，例如 https://stock-vote-panel-web.onrender.com
+
+  # ---------- 前端（Static Site） ----------
+  - type: web
+    name: stock-vote-panel-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE
+        sync: false   # 填后端 URL，例如 https://stock-vote-panel-api.onrender.com
