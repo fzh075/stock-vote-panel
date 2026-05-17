@@ -1,7 +1,7 @@
 
 在线访问 url：https://stock-vote-panel-web.onrender.com
 
-Prompt 由 AI 自行完成了，关键是 “JSON Schema” 这一模型商提供的功能。：[点击跳转](#-prompt-设计强制-llm-只返回-json-不废话)
+Prompt 由 AI 自行完成了，关键是 “JSON Schema” 这一模型商提供的功能：[点击跳转](#-prompt-设计强制-llm-只返回-json-不废话)
 
 Debug 记录：
 npm run setup:supabase
