@@ -1,3 +1,14 @@
+
+在线访问 url：https://stock-vote-panel-web.onrender.com
+
+Prompt 由 AI 自行完成了，关键是 “JSON Schema” 这一模型商提供的功能。：[点击跳转](#-prompt-设计强制-llm-只返回-json-不废话)
+
+Debug 记录：
+npm run setup:supabase
+脚本报错，粘贴报错给 AI。AI 去掉了 dotenv 依赖，改为直接用 Node 20+ 内置的 process.loadEnvFile
+
+
+
 # 📈 AI 股票分析面板（精简版）
 
 > 面试题：使用 AI 工具（Cursor/Claude Code）构建一个全栈应用，调用 LLM 分析股票数据，输出严格 JSON。
@@ -130,81 +141,6 @@ body: JSON.stringify({
 
 ---
 
-## 🐞 Debug 记录（AI 工具协作过的 3 个真实问题）
-
-### Bug ① CORS：前端 `Access-Control-Allow-Origin` 被阻
-
-**现象**：前端部署到 `*.onrender.com` 后，浏览器 Console：
-
-```
-Access to fetch at 'https://stock-vote-panel-api.onrender.com/api/analyze'
-from origin 'https://stock-vote-panel-web.onrender.com'
-has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present.
-```
-
-**用 AI 工具排查的过程**：
-
-> 我把整段报错 + `app.use(cors())` 那行贴给 Claude Code，问"为什么 Render 上还是拦"。它指出两点：
-> 1. `cors()` 默认 `*`，但携带凭证或自定义请求头时仍会被拦——更关键的是 **OPTIONS 预检**没走通；后端代码里我之前加了一个手写中间件返回 `204` 但 header 不全
-> 2. Render 重新部署后 service 的环境变量更新没有触发 build，前端 bundle 里 `VITE_API_BASE` 还指向旧地址，看起来"像 CORS"实际是请求打到了不存在的 URL → 504 → 浏览器把它显示成 CORS
-
-**修复**：
-
-- 后端改成显式白名单 + 让 `cors` 处理 preflight：
-
-  ```js
-  const allowedOrigins = (process.env.FRONTEND_ORIGIN || '*').split(',').map(s => s.trim());
-  app.use(cors({
-    origin: (origin, cb) => {
-      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
-        return cb(null, true);
-      }
-      return cb(new Error(`CORS blocked: ${origin}`));
-    }
-  }));
-  ```
-- Render 静态站点 → **Clear build cache & deploy**，确保 `VITE_API_BASE` 重新打包。
-
-### Bug ② JSON 解析报错：`Unexpected token \` in JSON at position 0`
-
-**现象**：第一版只在 system prompt 写了 "return JSON"，结果 DeepSeek 偶尔返回：
-
-````
-```json
-{ "summary": "...", "sentiment": "Bullish", "risk_level": "Medium" }
-```
-````
-
-`JSON.parse()` 直接挂掉。
-
-**用 AI 工具排查的过程**：
-
-> 我把"raw 返回"贴给 Cursor 的 Composer，让它写防御性解析。它给了三段联动改动：
-> 1. 升级 prompt：`No markdown, no code fences, no commentary.` 显式禁止围栏
-> 2. 在调用层加 `response_format: { type: 'json_object' }`（OpenAI/DeepSeek 都支持）
-> 3. 写 `safeParseJSON()`：先去掉 ```` ``` ```` 围栏，再用 `indexOf('{')` / `lastIndexOf('}')` 截取首尾大括号区间
-
-修完之后跑 100 次 stress test 没再出过解析错误（即便偶有围栏也能 fallback）。
-
-### Bug ③ Render 部署失败：`SyntaxError: Cannot use import statement outside a module`
-
-**现象**：本地正常，Render 构建日志报：
-
-```
-file:///opt/render/project/src/server.js:2
-import express from 'express';
-^^^^^^
-SyntaxError: Cannot use import statement outside a module
-```
-
-**用 AI 工具排查**：
-
-> 直接把构建日志最后 30 行交给 Claude Code，问"why fail on Render only"。它指出 `package.json` 没写 `"type": "module"`，Render 默认 CommonJS。
-
-**修复**：在 `backend/package.json` 里加 `"type": "module"`，并确认 `engines.node >= 18`，重新 push 触发部署，构建一次过。
-
----
-
 ## ✅ 题目要求自查
 
 | 要求 | 实现位置 |
@@ -216,7 +152,6 @@ SyntaxError: Cannot use import statement outside a module
 | 代码 GitHub | 本仓库 |
 | README 含在线 URL | 顶部表格 |
 | Prompt 截图/代码 | 上方 "Prompt 设计" 章节，附完整代码与三层防御策略 |
-| AI 调 Bug 记录 | 上方 "Debug 记录" 三条 |
 
 ## 📜 License
 
